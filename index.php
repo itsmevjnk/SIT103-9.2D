@@ -27,7 +27,7 @@ error_reporting(E_ALL);
         </div>
         <div class="container my-3">
             <?php
-            $query_result = $db_conn->query("SELECT personnel.PER_ID AS ID, CONCAT(PER_FNAME, ' ', PER_LNAME) AS FULL_NAME, authentication.AUTH_EMAIL AS EMAIL, PER_DOB AS DOB, PER_ADDRESS AS ADDR, PER_PHONE AS PHONE, PER_ID_NUMBER AS DOC_ID, PER_HI_ID AS HI_ID, student.PER_ID AS STU_ID, staff.PER_ID AS STF_ID FROM personnel LEFT OUTER JOIN student ON student.PER_ID = personnel.PER_ID LEFT OUTER JOIN staff ON staff.PER_ID = personnel.PER_ID LEFT OUTER JOIN authentication ON authentication.PER_ID = personnel.PER_ID");
+            $query_result = $db_conn->query("SELECT personnel.PER_ID AS ID, CONCAT(PER_FNAME, ' ', PER_LNAME) AS FULL_NAME, authentication.AUTH_EMAIL AS EMAIL, PER_DOB AS DOB, PER_ADDRESS AS ADDR, PER_PHONE AS PHONE, PER_ID_NUMBER AS DOC_ID, PER_HI_ID AS HI_ID, student.PER_ID AS STU_ID, staff.PER_ID AS STF_ID FROM personnel LEFT OUTER JOIN student ON student.PER_ID = personnel.PER_ID LEFT OUTER JOIN staff ON staff.PER_ID = personnel.PER_ID LEFT OUTER JOIN authentication ON authentication.PER_ID = personnel.PER_ID ORDER BY personnel.PER_ID DESC");
             ?>
             <h2>Personnel list (<?php echo $query_result->num_rows; ?>)</h2>
             <?php
