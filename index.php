@@ -134,7 +134,7 @@ error_reporting(E_ALL);
                         </select>
                     </div>
                 </fieldset>
-                <fieldset class="row g-2" id="staff">
+                <fieldset class="row g-2 d-none" id="staff" disabled>
                     <legend>Staff-specific information</legend>
                     <div class="col-md-3">
                         <label for="stf_tfn" class="form-label">Tax File Number</label>
@@ -215,9 +215,67 @@ error_reporting(E_ALL);
             }
             ?>
         </div>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
         <script>
+        const campuses = new Map([
+            <?php
+            $query_result = $db_conn->query("SELECT CP_ID AS ID, CP_NAME AS NAME FROM campus");
+            if($query_result->num_rows > 0) {
+                while($row = $query_result->fetch_assoc()) {
+                    echo '[' . $row['ID'] . ', \'' . $row['NAME'] . '\'],';
+                }
+            }
+            ?>
+        ]);
+
+        const course_campuses = {
+            <?php
+            $course_query = $db_conn->query("SELECT CRS_CODE AS CODE FROM course");
+            if($course_query->num_rows > 0) {
+                while($course = $course_query->fetch_assoc()) {
+                    echo '\'' . $course['CODE'] . '\': new Map([';
+                    $campus_query = $db_conn->query("SELECT CC_ID, CP_ID FROM course_campus WHERE CRS_CODE = '" . $course['CODE'] . "'");
+                    if($campus_query->num_rows > 0) {
+                        while($campus = $campus_query->fetch_assoc()) {
+                            echo '[' . $campus['CP_ID'] . ', ' . $campus['CC_ID'] . '],';
+                        }
+                    }
+                    echo ']),';
+                }
+            }
+            ?>
+        };
+
+        function update_type() {
+            /* toggle between student and staff specific fields */
+            if($('input[name=per_type]:checked')[0].value == 'STU') {
+                $('#student').removeAttr('disabled');
+                $('#student').removeClass('d-none');
+                $('#staff').attr('disabled', 'disabled');
+                $('#staff').addClass('d-none');
+            } else {
+                $('#staff').removeAttr('disabled');
+                $('#staff').removeClass('d-none');
+                $('#student').attr('disabled', 'disabled');
+                $('#student').addClass('d-none');
+            }
+        }
         
+        function populate_campus() {
+            /* populate campus menu */
+            $('#stu_campus').empty();
+            course_campuses[$('#stu_course')[0].value].forEach(function(value, key, map) {
+                $('#stu_campus').append('<option value="' + value + '">' + campuses.get(key) + '</option>');
+            });
+        }
+
+        $('input[name=per_type]').change(update_type);
+        $('#stu_course').change(populate_campus);
+        $(document).ready(function() {
+            update_type();
+            populate_campus();
+        });
         </script>
     </body>
 </html>
