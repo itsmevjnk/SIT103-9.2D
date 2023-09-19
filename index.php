@@ -22,9 +22,78 @@ error_reporting(E_ALL);
             <i>Written for the SIT103 9.2D task</i>
         </div>
         <?php require './db.php'; ?>
+        <?php
+        /* further SQL format the string (i.e. add quotes if it's not empty, or NULL if it's empty) */
+        function sql_fmt($str) {
+            return (($str == '') ? 'NULL' : "'$str'");
+        }
+
+        if($_SERVER['REQUEST_METHOD'] == 'POST') {
+            /* POST request */
+            
+            // echo '<div class="alert alert-primary container my-3" role="alert">';
+            // var_dump($_POST);
+            // echo '</div>';
+
+            /* sanitise input data */
+            $fname = sql_fmt($db_conn->real_escape_string($_POST['fname']));
+            $lname = sql_fmt($db_conn->real_escape_string($_POST['lname']));
+            $dob = sql_fmt($db_conn->real_escape_string($_POST['dob']));
+            $address = sql_fmt($db_conn->real_escape_string($_POST['address']));
+            $phone = sql_fmt($db_conn->real_escape_string($_POST['phone']));
+            $id_type = sql_fmt($db_conn->real_escape_string($_POST['id_type']));
+            $id_num = sql_fmt($db_conn->real_escape_string($_POST['id_num']));
+            $id_loc = sql_fmt($db_conn->real_escape_string($_POST['id_loc']));
+            $id_expiry = sql_fmt($db_conn->real_escape_string($_POST['id_expiry']));
+            $hi_provider = sql_fmt($db_conn->real_escape_string($_POST['hi_provider']));
+            $hi_num = sql_fmt($db_conn->real_escape_string($_POST['hi_num']));
+
+            try {
+                /* insert generic personnel information */
+                if($db_conn->query("INSERT INTO personnel (PER_FNAME, PER_LNAME, PER_DOB, PER_ADDRESS, PER_PHONE, PER_ID_TYPE, PER_ID_NUMBER, PER_ID_LOCATION, PER_ID_EXPIRY, PER_HI_PROVIDER, PER_HI_ID) VALUES ($fname, $lname, $dob, $address, $phone, $id_type, $id_num, $id_loc, $id_expiry, $hi_provider, $hi_num)") !== TRUE)
+                    echo '<div class="alert alert-danger container my-3" role="alert">Cannot insert personnel information: ' . $db_conn->error . '</div>';
+                else {
+                    /* retrieve the added record's ID */
+                    $query_result = $db_conn->query("SELECT PER_ID FROM personnel WHERE PER_FNAME = $fname AND PER_LNAME = $lname AND PER_DOB = $dob AND PER_PHONE = $phone ORDER BY PER_ID DESC LIMIT 1"); // also use a number of other fields to get a better filtering effect
+                    if($query_result->num_rows > 0) {
+                        $id = $query_result->fetch_assoc()['PER_ID'];
+
+                        /* insert specific information */
+                        $success = false;                
+                        if($_POST['per_type'] == 'STU') {
+                            /* insert student information */
+
+                            $stu_type = sql_fmt($db_conn->real_escape_string($_POST['stu_type']));
+                            $stu_usi = sql_fmt($db_conn->real_escape_string($_POST['stu_usi']));
+                            $stu_scholarship = sql_fmt($db_conn->real_escape_string($_POST['stu_scholarship']));
+                            $stu_cc = $db_conn->real_escape_string($_POST['stu_cc']);
+                            $stu_course_stat = sql_fmt($db_conn->real_escape_string($_POST['stu_course_stat']));
+
+                            $success = ($db_conn->query("INSERT INTO student (PER_ID, STU_TYPE, STU_USI, STU_SCHOLARSHIP, CC_ID, STU_COURSE_STAT) VALUES ($id, $stu_type, $stu_usi, $stu_scholarship, $stu_cc, $stu_course_stat)") === TRUE);
+                        } else {
+                            /* insert staff information */
+
+                            $stf_tfn = sql_fmt($db_conn->real_escape_string(($_POST['stf_tfn'])));
+                            $stf_dept = $db_conn->real_escape_string($_POST['stf_dept']);
+                            $stf_role = sql_fmt($db_conn->real_escape_string(($_POST['stf_role'])));
+
+                            $success = ($db_conn->query("INSERT INTO staff (PER_ID, STF_TFN, DEPT_ID, STF_ROLE) VALUES ($id, $stf_tfn, $stf_dept, $stf_role)") === TRUE);
+                        }
+                        
+                        if($success == true)
+                            echo '<div class="alert alert-success container my-3" role="alert">Record has been inserted into the database.</div>';
+                        else
+                            echo '<div class="alert alert-danger container my-3" role="alert">Cannot insert personnel information: ' . $db_conn->error . '</div>';
+                    } else echo '<div class="alert alert-danger container my-3" role="alert">Personnel information readback failed</div>';
+                }
+            } catch(Exception $e) {
+                echo '<div class="alert alert-danger container my-3" role="alert">Cannot insert personnel information: ' . $e->getMessage() . '</div>';
+            }
+        }
+        ?>
         <div class="container my-3">
             <h2>Add a new person</h2>
-            <form  method="post">
+            <form method="post" class="needs-validation" novalidate>
                 <fieldset class="row g-2">
                     <legend>Common information</legend>
                     <div class="col-md-5">
@@ -156,7 +225,7 @@ error_reporting(E_ALL);
                     </div>
                     <div class="col-md-3">
                         <label for="stf_role" class="form-label">Role</label>
-                        <input type="text" class="form-control required" name="stf_tfn" id="stf_tfn" placeholder="Role" required>
+                        <input type="text" class="form-control required" name="stf_role" id="stf_role" placeholder="Role" required>
                     </div> 
                 </fieldset>
                 <div class="my-3 d-flex flex-row justify-content-evenly">
@@ -272,6 +341,7 @@ error_reporting(E_ALL);
 
         $('input[name=per_type]').change(update_type);
         $('#stu_course').change(populate_campus);
+
         $(document).ready(function() {
             update_type();
             populate_campus();
