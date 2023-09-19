@@ -24,6 +24,146 @@ error_reporting(E_ALL);
         <?php require './db.php'; ?>
         <div class="container my-3">
             <h2>Add a new person</h2>
+            <form  method="post">
+                <fieldset class="row g-2">
+                    <legend>Common information</legend>
+                    <div class="col-md-5">
+                        <label for="fname" class="form-label">First name</label>
+                        <input type="text" class="form-control" name="fname" id="fname" placeholder="First name" required>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="lname" class="form-label">Last name</label>
+                        <input type="text" class="form-control" name="lname" id="lname" placeholder="Last name" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="dob" class="form-label">Date of birth</label>
+                        <input type="date" class="form-control" name="dob" id="dob" required>
+                    </div>
+                    <div class="col-md-9">
+                        <label for="address" class="form-label">Address</label>
+                        <input type="text" class="form-control" name="address" id="address" placeholder="Address" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="phone" class="form-label">Phone number</label>
+                        <input type="text" class="form-control" name="phone" id="phone" placeholder="04xxxxxxxx" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="id_type" class="form-label">ID type</label>
+                        <select name="id_type" id="id_type" class="form-select">
+                            <option selected>Passport</option>
+                            <option>Driver Licence</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="id_num" class="form-label">ID document no.</label>
+                        <input type="text" class="form-control" name="id_num" name="id_num" placeholder="ID document no." required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="id_loc" class="form-label">ID issuer</label>
+                        <input type="text" class="form-control" name="id_loc" name="id_loc" placeholder="ID document issuer" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="id_expiry" class="form-label">ID expiry date</label>
+                        <input type="date" class="form-control" name="id_expiry" id="id_expiry" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="hi_provider" class="form-label">Health cover provider</label>
+                        <input type="text" class="form-control" name="hi_provider" name="hi_provider" placeholder="HC provider" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="hi_num" class="form-label">Health cover ID</label>
+                        <input type="text" class="form-control" name="hi_num" name="hi_num" placeholder="HC document no."required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Personnel type</label>
+                        <div>
+                            <div class="form-check form-check-inline">
+                                <input type="radio" class="form-check-input" name="per_type" id="per_type_stu" value="STU" checked>
+                                <label for="per_type_stu" class="form-check-label">Student</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input type="radio" class="form-check-input" name="per_type" id="per_type_stf" value="STF">
+                                <label for="per_type_stf" class="form-check-label">Staff</label>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset class="row g-2" id="student">
+                    <legend>Student-specific information</legend>
+                    <div class="col-md-3">
+                        <label for="stu_type" class="form-label">Student type</label>
+                        <select name="stu_type" id="stu_type" class="form-select">
+                            <option selected>Domestic</option>
+                            <option>International</option>
+                            <option>Exchange</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="stu_usi" class="form-label">USI (optional)</label>
+                        <input type="text" class="form-control" name="stu_usi" id="stu_usi" placeholder="USI">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="stu_scholarship" class="form-label">Scholarship (optional)</label>
+                        <input type="text" class="form-control" name="stu_scholarship" id="stu_scholarship" placeholder="Scholarship name">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="stu_course" class="form-label">Course</label>
+                        <select name="stu_course" id="stu_course" class="form-select">
+                            <?php
+                            $query_result = $db_conn->query("SELECT CRS_CODE AS CODE, CRS_NAME AS NAME FROM course");
+                            if($query_result->num_rows > 0) {
+                                while($row = $query_result->fetch_assoc()) {
+                                    echo '<option value="' . $row['CODE'] . '">' . $row['CODE'] . ' - ' . $row['NAME'] . '</option>';
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="stu_campus" class="form-label">Campus</label>
+                        <!-- to be filled by JavaScript -->
+                        <select name="stu_cc" id="stu_campus" class="form-select"></select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="stu_course_stat" class="form-label">Course status</label>
+                        <select name="stu_course_stat" id="stu_course_stat" class="form-select">
+                            <option>Not enrolled</option>
+                            <option selected>Enrolled</option>
+                            <option>Intermitted</option>
+                            <option>Discontinued</option>
+                        </select>
+                    </div>
+                </fieldset>
+                <fieldset class="row g-2" id="staff">
+                    <legend>Staff-specific information</legend>
+                    <div class="col-md-3">
+                        <label for="stf_tfn" class="form-label">Tax File Number</label>
+                        <input type="text" class="form-control required" name="stf_tfn" id="stf_tfn" placeholder="Tax File Number" required>
+                    </div> 
+                    <div class="col-md-6">
+                        <label for="stf_dept" class="form-label">Department</label>
+                        <select name="stf_dept" id="stf_dept" class="form-select">
+                            <option value="" selected>None</option>
+                            <?php
+                            $query_result = $db_conn->query("SELECT DEPT_ID AS ID, DEPT_NAME AS NAME FROM department");
+                            if($query_result->num_rows > 0) {
+                                while($row = $query_result->fetch_assoc()) {
+                                    echo '<option value="' . $row['ID'] . '">' . $row['NAME'] . '</option>';
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="stf_role" class="form-label">Role</label>
+                        <input type="text" class="form-control required" name="stf_tfn" id="stf_tfn" placeholder="Role" required>
+                    </div> 
+                </fieldset>
+                <div class="my-3 d-flex flex-row justify-content-evenly">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="reset" class="btn btn-danger">Reset</button>
+                </div>
+            </form>
         </div>
         <div class="container my-3">
             <?php
@@ -76,5 +216,8 @@ error_reporting(E_ALL);
             ?>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+        <script>
+        
+        </script>
     </body>
 </html>
