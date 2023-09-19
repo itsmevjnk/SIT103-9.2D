@@ -93,7 +93,7 @@ error_reporting(E_ALL);
         ?>
         <div class="container my-3">
             <h2>Add a new person</h2>
-            <form method="post" class="needs-validation" novalidate>
+            <form method="post" novalidate>
                 <fieldset class="row g-2">
                     <legend>Common information</legend>
                     <div class="col-md-5">
